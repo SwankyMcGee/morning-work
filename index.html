@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morning Work — The Learning Toolshed</title>
+<link rel="stylesheet" href="morning.css">
+<script src="morning.js"></script>
+</head>
+<body class="morning">
+
+<header class="site-head"></header>
+
+<main>
+
+  <!-- First run (and Settings): choose which parts to do. -->
+  <section id="chooser" hidden>
+    <h1>Morning Work</h1>
+    <p class="hero-tagline">A calm start to the day — fill in today&rsquo;s date, look at
+      the weather, and check in with feelings. One step at a time,
+      with a Skip on every part.</p>
+
+    <div class="setup">
+      <p class="setup-title">What should we do this morning?</p>
+      <p class="setup-note">Tap a part to add or take it away. Your picks are saved as
+        you make them, and you can change them any time with the
+        <span class="lbl">&#9881;&#65039; Settings</span> button up top.</p>
+      <div class="part-grid" id="partGrid" role="group" aria-label="Morning work parts"></div>
+      <p class="feedback neutral" id="chooserNote" hidden>Pick at least one part to start.</p>
+      <div class="stage-actions" id="chooserActions"></div>
+    </div>
+  </section>
+
+  <!-- The run: one part at a time. -->
+  <section id="run" hidden>
+    <p class="part-label" id="partLabel"></p>
+    <div class="progress" id="progress"></div>
+    <h1 id="partTitle"></h1>
+    <p class="prompt-line" id="prompt"></p>
+
+    <div class="stage">
+      <div class="sentence" id="sentence"></div>
+      <div class="choices" id="choices"></div>
+      <p class="feedback" id="feedback"></p>
+      <div class="stage-actions" id="actions"></div>
+    </div>
+  </section>
+
+  <!-- All done. -->
+  <section id="done" hidden>
+    <div class="done-screen">
+      <div class="rd-emoji" aria-hidden="true">&#127775;</div>
+      <h1 class="rd-title">You&rsquo;re ready for school!</h1>
+      <div class="recap card" id="recap"></div>
+      <div class="stage-actions" id="doneActions"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot"></footer>
+
+</body>
+</html>
