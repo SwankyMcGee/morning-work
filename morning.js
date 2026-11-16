@@ -479,7 +479,6 @@ function injectHeader() {
     if (soundOn()) chime('correct');   // confirm you turned it on
   });
   tools.appendChild(snd);
-  syncSoundBtn();
 
   /* Settings — opens the part chooser so the routine can change. */
   const set = document.createElement('button');
@@ -494,6 +493,7 @@ function injectHeader() {
 
   tools.appendChild(makeHoldBtn('home', 'Home', 1000, () => { location.href = 'index.html'; }));
   head.appendChild(tools);
+  syncSoundBtn();   // only once the button is in the document
 }
 
 function syncSoundBtn() {
