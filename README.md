@@ -19,7 +19,7 @@ stepped past without fuss.
 | 📅 **Today's date** | Fill in "Today is ___ the ___ of ___" — day of the week, date number and month, one blank at a time with three big choices. A wrong tap gets gentle neutral text ("Not quite — look at the calendar and try again"); after two tries the right one blinks kindly until tapped. |
 | 🗓️ **Yesterday & tomorrow** | "Yesterday was ___" and "Tomorrow will be ___" — the same three-choice fill-in, using the real calendar. |
 | 🌤️ **Weather** | Six big tiles (Sunny, Cloudy, Rainy, Snowy, Windy, Stormy). The student looks outside and picks — **every choice is right**. |
-| 💛 **Feelings** | Six big tiles (Happy, Calm, Worried, Sad, Angry, Tired). **Every choice is right** — it is a check-in, not a quiz. |
+| 💛 **Feelings** | The four-colour **Zones of Regulation** chart — Blue, Green, Yellow and Red panels with the official feelings placed in them (Blue: Sad, Tired, Bored, Sick, Hurt · Green: Happy, Calm, Focused, Relaxed, Proud · Yellow: Worried, Frustrated, Silly, Excited, Nervous · Red: Angry, Terrified, Panicked, Overjoyed, Out of control). Tap the feeling that fits — **every zone is okay**. |
 
 When the last part is done, a gentle recap ("You're ready for school!")
 shows the day's sheet: the date, yesterday/tomorrow, the weather and the

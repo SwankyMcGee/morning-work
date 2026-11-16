@@ -57,15 +57,18 @@ const PARTS = [
   { id: 'weather',  emoji: '\uD83C\uDF24\uFE0F', name: 'Weather',
     desc: 'Look outside and choose today\u2019s weather. Every choice is right.' },
   { id: 'feelings', emoji: '\uD83D\uDC9B', name: 'Feelings',
-    desc: 'How are you feeling this morning? Every choice is right.' }
+    desc: 'Find your feeling on the four-color Zones of Regulation chart. Every zone is okay.' }
 ];
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
                 'August', 'September', 'October', 'November', 'December'];
 
-/* Weather and feelings are check-ins, not quizzes: any tile may
-   be chosen, and the choice is kept for the day's recap. */
+/* Weather is a check-in, not a quiz: any tile may be chosen.
+   Feelings use the Zones of Regulation chart — the four coloured
+   zones with their feelings placed the way the framework places
+   them (The Zones of Regulation®, Kuypers — official 2024
+   visuals). All four zones are okay; the chart never grades. */
 const WEATHER = [
   { id: 'sunny',   emoji: '\u2600\uFE0F',  name: 'Sunny' },
   { id: 'cloudy',  emoji: '\u26C5',        name: 'Cloudy' },
@@ -75,14 +78,60 @@ const WEATHER = [
   { id: 'stormy',  emoji: '\u26C8\uFE0F',  name: 'Stormy' }
 ];
 
-const FEELINGS = [
-  { id: 'happy',   emoji: '\uD83D\uDE0A', name: 'Happy' },
-  { id: 'calm',    emoji: '\uD83D\uDE0C', name: 'Calm' },
-  { id: 'worried', emoji: '\uD83D\uDE1F', name: 'Worried' },
-  { id: 'sad',     emoji: '\uD83D\uDE22', name: 'Sad' },
-  { id: 'angry',   emoji: '\uD83D\uDE20', name: 'Angry' },
-  { id: 'tired',   emoji: '\uD83D\uDE34', name: 'Tired' }
+/* The four zones, in chart order. hint = the framework's own
+   caption for the zone; bg/border/text/deep are the zone's fixed
+   colours (semantic — they deliberately do not follow the
+   palette). Feelings follow the official 2024 zone placements. */
+const ZONES = [
+  { id: 'blue', name: 'Blue zone', dot: '#4a90d9',
+    hint: 'Low levels of energy and down feelings',
+    bg: '#dcebf9', border: '#5b8db8', text: '#274a66', deep: '#3f6f96',
+    feelings: [
+      { id: 'sad',     name: 'Sad',     emoji: '\uD83D\uDE22' },
+      { id: 'tired',   name: 'Tired',   emoji: '\uD83D\uDE34' },
+      { id: 'bored',   name: 'Bored',   emoji: '\uD83D\uDE11' },
+      { id: 'sick',    name: 'Sick',    emoji: '\uD83E\uDD12' },
+      { id: 'hurt',    name: 'Hurt',    emoji: '\uD83E\uDD15' }
+    ] },
+  { id: 'green', name: 'Green zone', dot: '#45a163',
+    hint: 'Calm energy and a sense of control',
+    bg: '#ddf2e4', border: '#5da074', text: '#2f5b41', deep: '#4a8a61',
+    feelings: [
+      { id: 'happy',   name: 'Happy',   emoji: '\uD83D\uDE0A' },
+      { id: 'calm',    name: 'Calm',    emoji: '\uD83D\uDE0C' },
+      { id: 'focused', name: 'Focused', emoji: '\uD83C\uDFAF' },
+      { id: 'relaxed', name: 'Relaxed', emoji: '\uD83E\uDDD8' },
+      { id: 'proud',   name: 'Proud',   emoji: '\u2B50' }
+    ] },
+  { id: 'yellow', name: 'Yellow zone', dot: '#e0b32a',
+    hint: 'Higher energy and stronger feelings',
+    bg: '#fdf4d2', border: '#d3a928', text: '#6b5410', deep: '#9a7b12',
+    feelings: [
+      { id: 'worried',    name: 'Worried',    emoji: '\uD83D\uDE1F' },
+      { id: 'frustrated', name: 'Frustrated', emoji: '\uD83D\uDE23' },
+      { id: 'silly',      name: 'Silly',      emoji: '\uD83D\uDE1C' },
+      { id: 'excited',    name: 'Excited',    emoji: '\uD83E\uDD29' },
+      { id: 'nervous',    name: 'Nervous',    emoji: '\uD83D\uDE2C' }
+    ] },
+  { id: 'red', name: 'Red zone', dot: '#d4615a',
+    hint: 'Extremely high energy and strongest feelings',
+    bg: '#fbe2e0', border: '#cf6a63', text: '#7a2f2a', deep: '#b3514a',
+    feelings: [
+      { id: 'angry',          name: 'Angry',          emoji: '\uD83D\uDE20' },
+      { id: 'terrified',      name: 'Terrified',      emoji: '\uD83D\uDE31' },
+      { id: 'panicked',       name: 'Panicked',       emoji: '\uD83D\uDE30' },
+      { id: 'overjoyed',      name: 'Overjoyed',      emoji: '\uD83D\uDE06' },
+      { id: 'out-of-control', name: 'Out of control', emoji: '\uD83C\uDF00' }
+    ] }
 ];
+
+function findFeeling(id) {
+  for (const z of ZONES) {
+    const f = z.feelings.find((x) => x.id === id);
+    if (f) return { zone: z, feeling: f };
+  }
+  return null;
+}
 
 /* ---------- Shared settings (theme + motifs) ---------- */
 
@@ -776,6 +825,7 @@ function renderPart() {
   renderProgress(els.progress, idx, order.length);
   feedback('', '');
   els.choices.textContent = '';
+  els.choices.className = 'choices';
   els.sentence.textContent = '';
 
   if (id === 'date' || id === 'around') {
@@ -807,13 +857,15 @@ function renderPart() {
     return;
   }
 
-  /* Check-in parts: any tile is right; Next unlocks after a pick. */
-  const opts = id === 'weather' ? WEATHER : FEELINGS;
-  const chosen = s.answers[id];
-  els.prompt.textContent = id === 'weather'
-    ? 'Look outside — what is the weather like today?'
-    : 'How are you feeling this morning?';
-  buildTiles(opts, chosen, id);
+  /* Check-in parts: any pick is right; Next unlocks after one. */
+  const chosen = id === 'weather' ? s.answers.weather : s.answers.feelings;
+  if (id === 'weather') {
+    els.prompt.textContent = 'Look outside — what is the weather like today?';
+    buildTiles(WEATHER, chosen, 'weather');
+  } else {
+    els.prompt.textContent = 'How are you feeling this morning? Tap your feeling — every zone is okay.';
+    buildZoneChart(chosen);
+  }
 
   const next = mkNext();
   if (chosen) {
@@ -907,6 +959,71 @@ function pickTile(opt, partId) {
   if (next) next.setAttribute('aria-disabled', 'false');
 }
 
+/* The four-zone feelings chart: every zone visible at once, its
+   feelings placed inside it the way the framework places them. */
+function buildZoneChart(chosen) {
+  els.choices.className = 'choices zone-chart';
+  els.choices.textContent = '';
+
+  for (const z of ZONES) {
+    const panel = document.createElement('div');
+    panel.className = 'zone';
+    panel.style.setProperty('--z-bg', z.bg);
+    panel.style.setProperty('--z-border', z.border);
+    panel.style.setProperty('--z-text', z.text);
+    panel.style.setProperty('--z-deep', z.deep);
+    panel.style.setProperty('--z-dot', z.dot);
+
+    const head = document.createElement('div');
+    head.className = 'zone-head';
+    head.innerHTML = '<span class="zone-dot" aria-hidden="true"></span>' +
+      '<span class="zone-name">' + z.name + '</span>';
+    const hint = document.createElement('p');
+    hint.className = 'zone-hint';
+    hint.textContent = z.hint;
+    panel.append(head, hint);
+
+    const row = document.createElement('div');
+    row.className = 'zone-feelings';
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', z.name + ' feelings');
+    for (const f of z.feelings) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'feeling';
+      b.dataset.id = f.id;
+      b.setAttribute('aria-pressed', chosen === f.id ? 'true' : 'false');
+      b.innerHTML = '<span class="f-emoji" aria-hidden="true">' + f.emoji +
+        '</span><span class="f-name">' + f.name + '</span>';
+      b.addEventListener('click', () => pickFeeling(z, f));
+      row.appendChild(b);
+    }
+    panel.appendChild(row);
+    els.choices.appendChild(panel);
+  }
+
+  const credit = document.createElement('p');
+  credit.className = 'zone-credit';
+  credit.textContent = 'Feeling zones follow The Zones of Regulation®.';
+  els.choices.appendChild(credit);
+}
+
+function pickFeeling(zone, feeling) {
+  const s = readState();
+  const answers = Object.assign({}, s.answers);
+  answers.feelings = feeling.id;
+  patchState({ answers });
+
+  for (const b of els.choices.querySelectorAll('.feeling')) {
+    b.setAttribute('aria-pressed', b.dataset.id === feeling.id ? 'true' : 'false');
+  }
+  chime('correct');
+  feedback('', feeling.name + ' — ' + zone.name.toLowerCase() + '. Thanks for sharing.');
+
+  const next = els.actions.querySelector('.btn.primary');
+  if (next) next.setAttribute('aria-disabled', 'false');
+}
+
 function saveAnswer(key, val) {
   const s = readState();
   const answers = Object.assign({}, s.answers);
@@ -980,8 +1097,9 @@ function buildRecap() {
     if (w) lines.push('Weather: ' + w.emoji + ' ' + w.name);
   }
   if (a.feelings) {
-    const f = FEELINGS.find((x) => x.id === a.feelings);
-    if (f) lines.push('Feeling: ' + f.emoji + ' ' + f.name);
+    const hit = findFeeling(a.feelings);
+    if (hit) lines.push('Feeling: ' + hit.feeling.emoji + ' ' + hit.feeling.name +
+      ' \u00B7 ' + hit.zone.name);
   }
   els.recap.innerHTML = lines.length
     ? lines.map((l) => '<p class="rd-line">' + l + '</p>').join('')

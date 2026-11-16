@@ -531,6 +531,94 @@ html[data-theme="warm"] .hold-btn.primary.holding {
 .choice.tile[aria-pressed="true"] .t-emoji { transform: scale(1.12); }
 .choice.tile .t-emoji { transition: transform .15s ease; }
 
+/* ---------- Feelings: the four-zone chart ----------
+   The zone colours are fixed and semantic (blue/green/yellow/red
+   as the framework defines them) — they deliberately do not
+   follow the palette. Pastel panels with dark text stay readable
+   on every background, including the dark palettes. */
+
+.zone-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: .7rem;
+  justify-items: stretch;
+}
+
+.zone {
+  background: var(--z-bg);
+  border: 2px solid var(--z-border);
+  border-radius: 14px;
+  padding: .7rem .8rem .85rem;
+  color: var(--z-text);
+  text-align: left;
+}
+
+.zone-head {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.zone-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--z-dot);
+  border: 1px solid rgba(0, 0, 0, .18);
+  flex: none;
+}
+
+.zone-hint {
+  margin: .15rem 0 .5rem;
+  font-size: .78rem;
+  line-height: 1.4;
+  color: var(--z-text);
+  opacity: .85;
+}
+
+.zone-feelings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.feeling {
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--z-text);
+  background: rgba(255, 255, 255, .82);
+  border: 1.5px solid var(--z-border);
+  border-radius: 999px;
+  padding: .35rem .7rem;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  cursor: pointer;
+}
+
+.feeling:hover { background: #ffffff; }
+.feeling:focus-visible { outline: 3px solid var(--z-deep); outline-offset: 2px; }
+
+.feeling[aria-pressed="true"] {
+  background: var(--z-deep);
+  border-color: var(--z-deep);
+  color: #ffffff;
+}
+
+.feeling .f-emoji { font-size: 1.05rem; line-height: 1; }
+
+.zone-credit {
+  grid-column: 1 / -1;
+  font-size: .78rem;
+  color: var(--dim);
+  margin: 0;
+  text-align: center;
+}
+
 /* Feedback line: gentle, never a buzzer. */
 .feedback {
   min-height: 1.6em;
