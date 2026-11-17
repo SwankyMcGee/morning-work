@@ -609,7 +609,7 @@ html[data-theme="warm"] .hold-btn.primary.holding {
   color: #ffffff;
 }
 
-.feeling .f-emoji { font-size: 1.05rem; line-height: 1; }
+.feeling .f-face { width: 26px; height: 26px; display: block; flex: none; }
 
 .zone-credit {
   grid-column: 1 / -1;
@@ -682,6 +682,7 @@ html[data-theme="warm"] .btn.primary {
 .rd-emoji { font-size: 2.6rem; line-height: 1.1; }
 .rd-title { font-size: 1.6rem; margin: .35rem 0 .3rem; }
 .rd-line { font-size: 1.05rem; margin: .25rem 0; text-align: left; }
+.rd-line .rd-face { width: 22px; height: 22px; vertical-align: -5px; }
 .rd-line strong { color: var(--accent2); }
 
 .recap { margin-top: .8rem; text-align: left; }

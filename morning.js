@@ -87,41 +87,41 @@ const ZONES = [
     hint: 'Low levels of energy and down feelings',
     bg: '#dcebf9', border: '#5b8db8', text: '#274a66', deep: '#3f6f96',
     feelings: [
-      { id: 'sad',     name: 'Sad',     emoji: '\uD83D\uDE22' },
-      { id: 'tired',   name: 'Tired',   emoji: '\uD83D\uDE34' },
-      { id: 'bored',   name: 'Bored',   emoji: '\uD83D\uDE11' },
-      { id: 'sick',    name: 'Sick',    emoji: '\uD83E\uDD12' },
-      { id: 'hurt',    name: 'Hurt',    emoji: '\uD83E\uDD15' }
+      { id: 'sad',     name: 'Sad' },
+      { id: 'tired',   name: 'Tired' },
+      { id: 'bored',   name: 'Bored' },
+      { id: 'sick',    name: 'Sick' },
+      { id: 'hurt',    name: 'Hurt' }
     ] },
   { id: 'green', name: 'Green zone', dot: '#45a163',
     hint: 'Calm energy and a sense of control',
     bg: '#ddf2e4', border: '#5da074', text: '#2f5b41', deep: '#4a8a61',
     feelings: [
-      { id: 'happy',   name: 'Happy',   emoji: '\uD83D\uDE0A' },
-      { id: 'calm',    name: 'Calm',    emoji: '\uD83D\uDE0C' },
-      { id: 'focused', name: 'Focused', emoji: '\uD83C\uDFAF' },
-      { id: 'relaxed', name: 'Relaxed', emoji: '\uD83E\uDDD8' },
-      { id: 'proud',   name: 'Proud',   emoji: '\u2B50' }
+      { id: 'happy',   name: 'Happy' },
+      { id: 'calm',    name: 'Calm' },
+      { id: 'focused', name: 'Focused' },
+      { id: 'relaxed', name: 'Relaxed' },
+      { id: 'proud',   name: 'Proud' }
     ] },
   { id: 'yellow', name: 'Yellow zone', dot: '#e0b32a',
     hint: 'Higher energy and stronger feelings',
     bg: '#fdf4d2', border: '#d3a928', text: '#6b5410', deep: '#9a7b12',
     feelings: [
-      { id: 'worried',    name: 'Worried',    emoji: '\uD83D\uDE1F' },
-      { id: 'frustrated', name: 'Frustrated', emoji: '\uD83D\uDE23' },
-      { id: 'silly',      name: 'Silly',      emoji: '\uD83D\uDE1C' },
-      { id: 'excited',    name: 'Excited',    emoji: '\uD83E\uDD29' },
-      { id: 'nervous',    name: 'Nervous',    emoji: '\uD83D\uDE2C' }
+      { id: 'worried',    name: 'Worried' },
+      { id: 'frustrated', name: 'Frustrated' },
+      { id: 'silly',      name: 'Silly' },
+      { id: 'excited',    name: 'Excited' },
+      { id: 'nervous',    name: 'Nervous' }
     ] },
   { id: 'red', name: 'Red zone', dot: '#d4615a',
     hint: 'Extremely high energy and strongest feelings',
     bg: '#fbe2e0', border: '#cf6a63', text: '#7a2f2a', deep: '#b3514a',
     feelings: [
-      { id: 'angry',          name: 'Angry',          emoji: '\uD83D\uDE20' },
-      { id: 'terrified',      name: 'Terrified',      emoji: '\uD83D\uDE31' },
-      { id: 'panicked',       name: 'Panicked',       emoji: '\uD83D\uDE30' },
-      { id: 'overjoyed',      name: 'Overjoyed',      emoji: '\uD83D\uDE06' },
-      { id: 'out-of-control', name: 'Out of control', emoji: '\uD83C\uDF00' }
+      { id: 'angry',          name: 'Angry' },
+      { id: 'terrified',      name: 'Terrified' },
+      { id: 'panicked',       name: 'Panicked' },
+      { id: 'overjoyed',      name: 'Overjoyed' },
+      { id: 'out-of-control', name: 'Out of control' }
     ] }
 ];
 
@@ -993,8 +993,8 @@ function buildZoneChart(chosen) {
       b.className = 'feeling';
       b.dataset.id = f.id;
       b.setAttribute('aria-pressed', chosen === f.id ? 'true' : 'false');
-      b.innerHTML = '<span class="f-emoji" aria-hidden="true">' + f.emoji +
-        '</span><span class="f-name">' + f.name + '</span>';
+      b.innerHTML = '<img class="f-face" src="faces/' + f.id + '.svg" alt="" width="26" height="26">' +
+        '<span class="f-name">' + f.name + '</span>';
       b.addEventListener('click', () => pickFeeling(z, f));
       row.appendChild(b);
     }
@@ -1098,7 +1098,8 @@ function buildRecap() {
   }
   if (a.feelings) {
     const hit = findFeeling(a.feelings);
-    if (hit) lines.push('Feeling: ' + hit.feeling.emoji + ' ' + hit.feeling.name +
+    if (hit) lines.push('Feeling: <img class="rd-face" src="faces/' + hit.feeling.id +
+      '.svg" alt="" width="22" height="22"> ' + hit.feeling.name +
       ' \u00B7 ' + hit.zone.name);
   }
   els.recap.innerHTML = lines.length
