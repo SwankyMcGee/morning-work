@@ -1157,6 +1157,22 @@ if (document.readyState === 'loading') {
   initChrome();
 }
 
+/* Our Day's reminder notices: one small same-origin script, loaded only
+   when this page is served from the Toolshed hub. Opened from disk the
+   tool stays fully offline — no network request is ever made. */
+(function loadOurDayNotify() {
+  try {
+    if (location.protocol === 'file:') return;
+    if (location.hostname !== 'swankymcgee.github.io') return;
+    if (document.querySelector('script[data-ourday-notify]')) return;
+    const s = document.createElement('script');
+    s.src = 'https://swankymcgee.github.io/our-day/ourday-notify.js';
+    s.dataset.ourdayNotify = '1';
+    s.defer = true;
+    document.head.appendChild(s);
+  } catch (err) { /* never break this tool */ }
+})();
+
 /* Another tab changed the shared palette or patterns — follow it. */
 window.addEventListener('storage', (e) => {
   if (e.key === STORAGE_KEY) {

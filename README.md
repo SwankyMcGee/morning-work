@@ -39,6 +39,10 @@ feeling. **Start over** (hold one second) clears the sheet for a redo.
 - The same **11 palettes** as the rest of the Toolshed (header 🎨), the same
   background-pattern switch, and gentle Web Audio sound that never starts on
   its own (header 🔊).
+- **One small same-origin script**: when served from the hub, `morning.js` loads
+  `our-day/ourday-notify.js` so Our Day's gentle reminders can show a top-right
+  notice here too. Opened from disk (`file:`) no request is ever made — the tool
+  stays fully offline.
 
 ## Keeping in step with the rest of the Toolshed
 
