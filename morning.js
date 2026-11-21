@@ -472,8 +472,21 @@ function makeHoldable(el, ms, action) {
   el.addEventListener('click', (e) => e.preventDefault());   // hold fires only
 }
 
-/* Build a header/stage hold button. kind picks the emoji. */
-function makeHoldBtn(kind, label, ms, action) {
+/* Monochrome SVG icons for the standard header cluster — the same set
+   every Toolshed tool uses, so the buttons stay recognisable as a
+   teacher moves between tools. */
+const ICONS = {
+  bell: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>',
+  expand: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm16 0v6h-6v-2h4v-4z"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.49.42l-.38 2.65c-.61.25-1.17.58-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46c.13.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.05.24.26.42.49.42h4c.24 0 .45-.18.49-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1c.22.08.48 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.65zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z"/></svg>',
+  home: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 3.2 2.6 11.5V21h6.6v-6.2h5.6V21h6.6v-9.5z"/></svg>'
+};
+
+const HUB_URL = 'https://swankymcgee.github.io/';
+
+/* Build a header/stage hold button. kind picks the emoji, or `icon`
+   passes an SVG for the standard header cluster. */
+function makeHoldBtn(kind, label, ms, action, icon) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'hold-btn';
@@ -482,13 +495,18 @@ function makeHoldBtn(kind, label, ms, action) {
   btn.title = label + ' (hold ' + (ms / 1000) + ' second' + (ms === 1000 ? '' : 's') + ')';
   btn.setAttribute('aria-label', btn.title);
 
-  const emoji = kind === 'home' ? '\uD83C\uDFE0' : kind === 'skip' ? '➡️'
-    : kind === 'start' ? '▶️' : kind === 'again' ? '\uD83D\uDD04' : '⚙️';
   const span = document.createElement('span');
-  span.className = 'hold-emoji';
   span.setAttribute('aria-hidden', 'true');
-  span.textContent = emoji;
+  if (icon) {
+    span.className = 'hold-icon';
+    span.innerHTML = icon;
+  } else {
+    span.className = 'hold-emoji';
+    span.textContent = kind === 'home' ? '\uD83C\uDFE0' : kind === 'skip' ? '➡️'
+      : kind === 'start' ? '▶️' : kind === 'again' ? '\uD83D\uDD04' : '⚙️';
+  }
   const text = document.createElement('span');
+  text.className = 'hold-label';
   text.textContent = label;
 
   const track = document.createElement('span');
@@ -505,7 +523,7 @@ function makeHoldBtn(kind, label, ms, action) {
 
 /* ---------- Shared page wiring ---------- */
 
-/* Build the brand + sound/settings/home controls (the palette
+/* Build the brand + the standard control cluster (the palette
    picker arrives separately via injectPicker). */
 function injectHeader() {
   const head = document.querySelector('.site-head');
@@ -521,43 +539,180 @@ function injectHeader() {
   const tools = document.createElement('div');
   tools.className = 'head-tools';
 
-  /* Sound on/off — a plain tap (it only changes a preference). */
-  const snd = document.createElement('button');
-  snd.type = 'button';
-  snd.className = 'theme-btn';
-  snd.id = 'soundBtn';
-  snd.addEventListener('click', () => {
+  /* The standard Toolshed cluster — same buttons, same order, same
+     holds on every tool: Chime (1s) · Fullscreen (1s) · Settings (3s)
+     · Home (1s, back to the hub), right-aligned. */
+  const controls = document.createElement('div');
+  controls.className = 'header-controls';
+  controls.setAttribute('role', 'group');
+  controls.setAttribute('aria-label', 'Tool controls');
+
+  /* Chime on/off — a deliberate hold, like every other control. */
+  controls.appendChild(makeHoldBtn('sound', 'Chime: on', 1000, () => {
     patchState({ sound: !soundOn() });
     syncSoundBtn();
     if (soundOn()) chime('correct');   // confirm you turned it on
-  });
-  tools.appendChild(snd);
+  }, ICONS.bell));
+
+  /* Fullscreen — fill the board/tablet screen for the whole class. */
+  controls.appendChild(makeHoldBtn('fs', 'Fullscreen', 1000, toggleFs, ICONS.expand));
 
   /* Settings — opens the part chooser so the routine can change. */
-  const set = document.createElement('button');
-  set.type = 'button';
-  set.className = 'theme-btn';
-  set.id = 'settingsBtn';
-  set.title = 'Change which parts we do';
-  set.setAttribute('aria-label', set.title);
-  set.innerHTML = '<span aria-hidden="true">⚙️</span><span>Settings</span>';
-  set.addEventListener('click', openChooser);
-  tools.appendChild(set);
+  controls.appendChild(makeHoldBtn('settings', 'Settings', 3000, openChooser, ICONS.gear));
 
-  tools.appendChild(makeHoldBtn('home', 'Home', 1000, () => { location.href = 'index.html'; }));
+  controls.appendChild(makeHoldBtn('home', 'Home', 1000, () => { location.href = HUB_URL; }, ICONS.home));
+
+  document.addEventListener('fullscreenchange', syncFsBtn);
+  document.addEventListener('webkitfullscreenchange', syncFsBtn);
+
+  tools.appendChild(controls);
   head.appendChild(tools);
+  syncFsBtn();
   syncSoundBtn();   // only once the button is in the document
+}
+
+/* ---------- Fullscreen (standard cluster button) ---------- */
+
+function fsOn() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function toggleFs() {
+  if (!fsOn()) {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req) return;
+    try {
+      const p = req.call(el);
+      if (p && typeof p.catch === 'function') p.catch(function () {});
+    } catch (err) { /* denied */ }
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    try { if (exit) exit.call(document); } catch (err) { /* ignore */ }
+  }
+}
+
+function syncFsBtn() {
+  const b = document.getElementById('fsBtn');
+  if (!b) return;
+  const on = fsOn();
+  const label = b.querySelector('.hold-label');
+  if (label) label.textContent = on ? 'Exit fullscreen' : 'Fullscreen';
+  b.title = on ? 'Hold for 1 second to leave fullscreen'
+               : 'Hold for 1 second to fill the screen';
+  b.setAttribute('aria-label', b.title);
 }
 
 function syncSoundBtn() {
   const b = document.getElementById('soundBtn');
   if (!b) return;
   const on = soundOn();
+  const state = on ? 'Chime: on' : 'Chime: off';
   b.setAttribute('aria-pressed', on ? 'true' : 'false');
-  b.title = (on ? 'Turn sound off' : 'Turn sound on');
+  b.title = state + ' \u2014 hold 1 second to turn it ' + (on ? 'off' : 'on');
   b.setAttribute('aria-label', b.title);
-  b.innerHTML = '<span aria-hidden="true">' + (on ? '\uD83D\uDD0A' : '\uD83D\uDD07') +
-    '</span><span>' + (on ? 'Sound on' : 'Sound off') + '</span>';
+  const label = b.querySelector('.hold-label');
+  if (label) label.textContent = state;   // the button always says its state out loud
+}
+
+/* ---------- Shared footer: workbench scene + shed wisdom ----------
+   The same closing scene every Toolshed page shows, drawn only from
+   the active palette's variables so it reads on all 11 themes. The
+   phrase stays fixed; one line of shed wisdom rotates every 20s
+   (instant swap when the visitor prefers reduced motion). */
+
+const FOOTER_SCENE = [
+  '<svg viewBox="0 0 1100 160" xmlns="http://www.w3.org/2000/svg" focusable="false">',
+  '<g stroke-linecap="round" stroke-linejoin="round">',
+  '<path d="M18 141h1064" stroke="var(--border)" stroke-width="3"/>',
+  '<path class="glow" style="animation-delay:-1s" d="M556 16l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="var(--accent)" opacity=".65"/>',
+  '<path class="glow" style="animation-delay:-3s" d="M678 28l2.5 6.5 6.5 2.5-6.5 2.5-2.5 6.5-2.5-6.5-6.5-2.5 6.5-2.5z" fill="var(--accent2)" opacity=".7"/>',
+  '<rect x="78" y="68" width="134" height="73" rx="3" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="3"/>',
+  '<rect x="176" y="28" width="16" height="26" rx="2" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="3"/>',
+  '<path d="M64 72 145 26l81 46h-14L145 40 78 72z" fill="var(--accent)"/>',
+  '<rect x="94" y="84" width="30" height="28" rx="3" fill="var(--surface)" stroke="var(--dim)" stroke-width="3"/>',
+  '<path d="M109 84v28M94 98h30" stroke="var(--dim)" stroke-width="2.5"/>',
+  '<rect x="140" y="98" width="44" height="43" rx="4" fill="var(--surface)" stroke="var(--dim)" stroke-width="3"/>',
+  '<circle cx="174" cy="120" r="3.5" fill="var(--dim)"/>',
+  '<path d="M262 42h284" stroke="var(--dim)" stroke-width="4"/>',
+  '<circle cx="262" cy="42" r="5" fill="var(--accent)"/>',
+  '<circle cx="546" cy="42" r="5" fill="var(--accent)"/>',
+  '<g class="sway" style="animation-delay:-1s">',
+  '<rect x="261" y="42" width="38" height="13" rx="3" fill="var(--accent)"/>',
+  '<rect x="275" y="55" width="10" height="46" rx="5" fill="var(--dim)"/>',
+  '</g>',
+  '<g class="sway" style="animation-delay:-3s">',
+  '<rect x="338" y="44" width="42" height="18" rx="9" fill="var(--accent)"/>',
+  '<path d="M344 62h32l4 40-4 6-4-6-4 6-4-6-4 6-4-6-4 6-4-6-4 6-4-6z" fill="var(--surface-2)" stroke="var(--dim)" stroke-width="2.5"/>',
+  '</g>',
+  '<g class="sway" style="animation-delay:-2s">',
+  '<rect x="434" y="44" width="12" height="42" rx="6" fill="var(--accent)"/>',
+  '<rect x="430" y="84" width="20" height="13" rx="3" fill="var(--dim)"/>',
+  '<path d="M431 97h18l-4 20h-10z" fill="var(--accent2)"/>',
+  '</g>',
+  '<g class="sway" style="animation-delay:-4s">',
+  '<path d="M505 44v12" stroke="var(--dim)" stroke-width="3"/>',
+  '<circle cx="505" cy="74" r="18" fill="var(--accent)" stroke="var(--dim)" stroke-width="3"/>',
+  '<circle cx="505" cy="74" r="6" fill="var(--surface)"/>',
+  '<rect x="500" y="90" width="10" height="16" rx="2" fill="var(--dim)"/>',
+  '</g>',
+  '<rect x="592" y="126" width="286" height="9" rx="4" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>',
+  '<rect x="592" y="118" width="14" height="23" fill="var(--dim)"/>',
+  '<rect x="864" y="118" width="14" height="23" fill="var(--dim)"/>',
+  '<rect x="570" y="104" width="330" height="14" rx="5" fill="var(--accent)"/>',
+  '<g class="nod">',
+  '<path d="M624 71c0-10 0-16 0-24" stroke="var(--accent2)" stroke-width="3.5" fill="none"/>',
+  '<path d="M624 60c-11-2-17-11-15-21 10 1 17 10 15 21z" fill="var(--accent2)"/>',
+  '<path d="M624 52c10-3 15-12 12-21-9 2-15 11-12 21z" fill="var(--accent2)"/>',
+  '</g>',
+  '<rect x="601" y="71" width="46" height="11" rx="5" fill="var(--accent)"/>',
+  '<path d="M606 81h36l-5 23h-26z" fill="var(--accent)"/>',
+  '<rect x="690" y="82" width="24" height="22" rx="3" fill="var(--surface-2)" stroke="var(--dim)" stroke-width="2.5"/>',
+  '<rect x="718" y="82" width="24" height="22" rx="3" fill="var(--surface-2)" stroke="var(--dim)" stroke-width="2.5"/>',
+  '<rect x="704" y="58" width="24" height="24" rx="3" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="2.5"/>',
+  '<path d="M790 74h30v20a10 10 0 0 1-10 10h-10a10 10 0 0 1-10-10z" fill="var(--surface-2)" stroke="var(--dim)" stroke-width="2.5"/>',
+  '<path d="M820 80a9 9 0 0 1 0 16" fill="none" stroke="var(--dim)" stroke-width="3"/>',
+  '<path d="M798 66c0-6 6-6 6-12M810 68c0-5 5-6 5-11" stroke="var(--dim)" stroke-width="2.5" fill="none" opacity=".7"/>',
+  '<g transform="rotate(-4 870 98)">',
+  '<rect x="838" y="94" width="46" height="10" rx="3" fill="var(--accent)"/>',
+  '<path d="M884 94l12 5-12 5z" fill="var(--dim)"/>',
+  '</g>',
+  '<rect x="1000" y="70" width="13" height="71" fill="var(--dim)"/>',
+  '<rect x="944" y="46" width="132" height="46" rx="8" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="3"/>',
+  '<path d="M960 60h100M960 70h100M960 80h64" stroke="var(--dim)" stroke-width="3" opacity=".75"/>',
+  '</g></svg>'
+].join('');
+
+const SHED_WISDOM = [
+  'Measure twice, click once.',
+  'Built in the shed \u2014 no sawdust in the keyboard.',
+  'Take your time; good work never hurries.',
+  'Small steps build strong shelves.',
+  'Every expert started with a wobbly first nail.',
+  'A tidy bench makes room for big ideas.',
+  'Sharpen the pencil, then begin.',
+  'Slow hands make neat work.',
+  'You\u2019re plane amazing.',
+  'Sawdust settles, good ideas rise.'
+];
+
+function startWisdom(foot) {
+  const el = foot.querySelector('.foot-wisdom');
+  if (!el || el.dataset.on === '1') return;
+  el.dataset.on = '1';
+  let i = Math.floor(Math.random() * SHED_WISDOM.length);
+  const quote = () => '\u201C' + SHED_WISDOM[i] + '\u201D';
+  el.textContent = quote();
+  const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  window.setInterval(() => {
+    i = (i + 1) % SHED_WISDOM.length;
+    if (reduce) { el.textContent = quote(); return; }
+    el.classList.add('fading');
+    window.setTimeout(() => {
+      el.textContent = quote();
+      el.classList.remove('fading');
+    }, 650);
+  }, 20000);
 }
 
 /* Footer phrase — same wording as the site's ten pages. */
@@ -566,8 +721,12 @@ function injectFooter() {
   if (!foot || foot.dataset.ready) return;
   foot.dataset.ready = '1';
   foot.innerHTML =
-    '<a href="index.html">Home</a> \u00B7 Staff resources for The Learning Toolshed \u00B7 ' +
-    '<a href="https://swankymcgee.github.io/">The Learning Toolshed</a> \u00B7 App state: November 2026';
+    '<div class="foot-scene" aria-hidden="true">' + FOOTER_SCENE + '</div>' +
+    '<p class="foot-phrase">Staff resources for ' +
+    '<a href="https://swankymcgee.github.io/">The Learning Toolshed</a></p>' +
+    '<p class="foot-wisdom"></p>' +
+    '<p class="foot-meta">App state: November 2026</p>';
+  startWisdom(foot);
 }
 
 /* Round progress dots: `done` filled, `current` outlined. */

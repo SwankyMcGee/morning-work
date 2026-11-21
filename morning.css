@@ -80,6 +80,15 @@ a { color: var(--accent); }
   align-items: center;
 }
 
+/* The standard Toolshed control cluster (Chime · Fullscreen ·
+   Settings · Home) — right-aligned, wraps before anything collides. */
+.header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: .5rem;
+}
+
 main {
   max-width: 60rem;
   margin: 0 auto;
@@ -98,15 +107,51 @@ p { margin: .45rem 0; }
 
 .lbl { font-weight: 700; color: var(--text); }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer (shared Toolshed scene + rotating wisdom) ---------- */
 
 .site-foot {
   max-width: 62rem;
   margin: 0 auto;
-  padding: 1rem 1.2rem 2rem;
+  padding: 0 1.2rem 1.4rem;
   color: var(--dim);
-  font-size: .87rem;
+  font-size: .85rem;
   border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.foot-scene { display: block; padding-top: .4rem; }
+.foot-scene svg {
+  display: block;
+  width: min(100%, 1080px);
+  height: auto;
+  max-height: 190px;
+  margin: 0 auto;
+}
+.foot-phrase { margin: .3rem 0 0; font-size: .95rem; font-weight: 700; color: var(--text); }
+.foot-phrase a { color: var(--accent); }
+.foot-wisdom {
+  margin: .35rem 0 0;
+  min-height: 1.4em;
+  font-style: italic;
+  color: var(--dim);
+  transition: opacity .6s ease;
+}
+.foot-wisdom.fading { opacity: 0; }
+.foot-meta { margin: .55rem 0 0; font-size: .8rem; }
+
+/* Scene life — slow sways, switched off under reduced motion. */
+.foot-scene .sway { transform-box: fill-box; transform-origin: 50% 0%; }
+.foot-scene .nod { transform-box: fill-box; transform-origin: 50% 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .foot-scene .sway { animation: toolSway 6s ease-in-out infinite alternate; }
+  .foot-scene .nod { animation: sproutNod 7s ease-in-out infinite alternate; }
+  .foot-scene .glow { animation: twinkle 4.5s ease-in-out infinite alternate; }
+}
+@keyframes toolSway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+@keyframes sproutNod { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+@keyframes twinkle { from { opacity: .3; } to { opacity: .85; } }
+@media (prefers-reduced-motion: reduce) {
+  .foot-wisdom { transition: none; }
 }
 
 /* ---------- Hold-to-activate (kid-safe buttons) ----------
@@ -139,6 +184,8 @@ p { margin: .45rem 0; }
 .hold-btn.holding { border-color: var(--accent); color: var(--accent); }
 .hold-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .hold-btn .hold-emoji { font-size: 1.05rem; }
+.hold-icon { display: inline-flex; align-items: center; }
+.hold-icon svg { display: block; }
 
 .hold-track {
   position: absolute;
